@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text,TouchableOpacity,Image,View,PermissionsAndroid,} from 'react-native';
+import {Text,TouchableOpacity,Image,View,PermissionsAndroid,Platform} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import SplashScreen from "react-native-splash-screen";
 
@@ -9,34 +9,39 @@ class GetImage extends React.Component{
     constructor(){
         super();
         this.state={
-            imageUrl:''
+            imageUrl:'',
+            imageWidth:0,
+            imageHeight:0
         }
         this.selectPhotoTapped = this.selectPhotoTapped.bind(this);
-        this.requestCarmeraPermission = this.requestCarmeraPermission.bind(this);
-    }
-    async componentDidMount(){
-       await this.requestCarmeraPermission();
-    }
-    async requestCarmeraPermission() {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.CAMERA,
-            )
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                this.show("你已获取了相机权限")
-            } else {
-                this.show("获取相机失败")
-            }
-        } catch (err) {
-            this.show(err.toString())
-        }
-    }
-    show(text){
-        alert(text);
     }
 
      //选择图片
      selectPhotoTapped() {
+
+
+        // if(Platform.OS === 'android'){
+        //     PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA)
+        //         .then(res => {
+        //             console.log('res================================');
+        //             console.log(res);
+        //             console.log('====================================');
+        //             if(res !== 'granted') {
+        //                 alert('相机权限没打开', '请在手机的“设置”选项中,允许访问您的摄像头和麦克风')
+        //                 return ;
+        //             }
+        //         });
+        // } else {
+        //     if(Camera){
+        //         Camera.checkDeviceAuthorizationStatus()
+        //             .then(access => {
+        //                 if(!access) {
+        //                     alert('相机权限没打开', '请在iPhone的“设置-隐私”选项中,允许访问您的摄像头和麦克风')
+        //                 }
+        //             });
+        //     }
+        // }
+
          console.log('====================================');
          console.log('huoqu');
          console.log('====================================');
@@ -71,12 +76,14 @@ class GetImage extends React.Component{
             } else if (response.customButton) {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
-                let source = {uri: response.uri};
+                let source = {uri: 'data:image/jpeg;base64,'  + response.data};
                 // You can also display the image using data:
                 // let source = { uri: 'data:image/jpeg;base64,' + response.data };
                 this.setState({
                     imageUrl:source,
-                    avatarSource: source
+                    avatarSource: source,
+                    imageWidth:response.width,
+                    imageHeight:response.height
                 },()=>{
                     console.log('=========imageUrl==================');
                     console.log(this.state.imageUrl);
@@ -89,6 +96,7 @@ class GetImage extends React.Component{
 
     }
     render(){
+        const {imageWidth,imageHeight} = this.state;
         return(
          <View>
              <TouchableOpacity onPress={this.selectPhotoTapped}>
@@ -97,8 +105,8 @@ class GetImage extends React.Component{
                 </Text>
             </TouchableOpacity>
             <Image 
-                source={{uri:this.state.imageUrl}}
-                style={{width:200,height:200}}
+                source={this.state.imageUrl}
+                style={{width:imageWidth,height:imageHeight}}
             />
          </View>
         )

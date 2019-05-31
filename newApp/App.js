@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import {Platform, StyleSheet, Text, View,BackHandler} from 'react-native';
 import MainPage from './MainPage.js';
 
 const instructions = Platform.select({
@@ -19,6 +19,50 @@ const instructions = Platform.select({
 
 type Props = {};
 export default class App extends Component<Props> {
+  async componentDidMount(){
+    if (Platform.OS === 'android') {
+      const granted = await this.requestReadPermission();
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        BackHandler.exitApp();
+        return;
+      }
+      await this.requestCameraPermission();
+      // await this.requestExternalStorage();
+     // await this.requestLocationPermission();
+    //  await this.requestPhonePermission();
+    }
+ }
+ async requestReadPermission() {
+  try {
+    const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      return granted;
+    } else {
+      this.show('存储权限获取失败');
+    }
+  } catch (err) {
+    this.show(err.toString())
+  }
+}
+ async requestCameraPermission() {
+     try {
+         const granted = await PermissionsAndroid.request(
+             PermissionsAndroid.PERMISSIONS.CAMERA,
+         )
+         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+             this.show("你已获取了相机权限")
+         } else {
+             this.show("获取相机失败")
+         }
+     } catch (err) {
+         this.show(err.toString())
+     }
+ }
+ show(text){
+     alert(text);
+ }
   render() {
     return (
       <View style={styles.container}>
